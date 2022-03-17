@@ -13,7 +13,6 @@
 # V3 Update Log
 # - Player can't @double if (2 * @bet) > credit
 
-require 'pry-byebug'
 require_relative 'methods'
 system 'clear'
 # Card library
