@@ -24,22 +24,39 @@ def croupier_picks(croupier_1rst_pick, croupier_2nd_pick)
   @croupier_total_score = 12 if @croupier_total_score == 22
 end
 
-def player_picks(player_1rst_pick, player_2nd_pick, player_hand_score, player_hand)
+def player_picks(player_1rst_pick, player_2nd_pick, player_first_hand)
   player_hand = "#{player_1rst_pick[0]} ~~~ #{player_2nd_pick[0]}"
-  player_hand_score = player_1rst_pick[1] + player_2nd_pick[1]
-  player_hand_score = 12 if player_hand_score == 22
+  if player_first_hand
+    @player_first_hand = player_hand
+    @player_first_hand_score += player_1rst_pick[1] + player_2nd_pick[1]
+  else
+    @player_second_hand = player_hand
+    @player_second_hand_score += player_1rst_pick[1] + player_2nd_pick[1]
+  end
 end
 
-def show_cards(croupier_hand, player_first_hand, player_second_hand)
+def show_cards(show_score)
   puts 'Croupier cards:'
   puts ''
-  puts croupier_hand
+  puts @croupier_hand
   puts ''
   puts 'These are your cards:'
   puts ''
-  puts player_first_hand
-  p '   ///   ' + player_second_hand if player_second_hand != ''
+  if @player_second_hand.empty?
+    puts @player_first_hand
+  else
+    puts @player_first_hand + '   ///   ' + @player_second_hand
+  end
   puts ''
+  if show_score
+    if @player_second_hand != ''
+      puts "Here is your first hand score: #{@player_first_hand_score}"
+      puts "Here is your second hand score: #{@player_second_hand_score}"
+    else
+      puts "Here is your score: #{@player_first_hand_score}"
+    end
+  end
+  sleep(1)
 end
 
 def blackjack?(player_total_score, croupier_total_score, credit, bet)
