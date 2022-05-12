@@ -14,7 +14,20 @@
 # - Player can't @double if (2 * @bet) > credit
 
 require_relative 'methods'
+require 'curses'
 system 'clear'
+
+# Curses
+Curses.init_screen
+begin
+  win1 = Curses.stdscr.subwin(10, 20, 0, 0)
+  win1.box("|", "-")
+  win1.refresh
+  input = Curses.getstr
+ensure
+  Curses.close_screen
+end
+# Curses
 
 # Card library
 @cards_hash = { 'A♠' => 11,
@@ -256,7 +269,7 @@ while play
   # Game results
   if @game_is_on
     system 'clear'
-    puts 'First hand:'
+    puts 'First hand:' if @player_second_hand_score > 0
     if @croupier_total_score == @player_first_hand_score
       puts 'Push!'
     elsif @croupier_total_score > 21
