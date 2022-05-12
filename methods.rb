@@ -48,14 +48,14 @@ def show_cards(show_score)
     puts @player_first_hand + '   ///   ' + @player_second_hand
   end
   puts ''
-  if show_score
-    if @player_second_hand != ''
-      puts "Here is your first hand score: #{@player_first_hand_score}"
-      puts "Here is your second hand score: #{@player_second_hand_score}"
-    else
-      puts "Here is your score: #{@player_first_hand_score}"
-    end
-  end
+  # if show_score
+  #   if @player_second_hand_score > 0
+  #     puts "Here is your first hand score: #{@player_first_hand_score}"
+  #     puts "Here is your second hand score: #{@player_second_hand_score}"
+  #   else
+  #     puts "Here is your score: #{@player_first_hand_score}"
+  #   end
+  # end
   sleep(1)
 end
 
@@ -86,12 +86,12 @@ def what_to_do(credit, first_choice)
   end
   @answer = gets.chomp.capitalize
   puts ''
-  if @bet * 2 <= credit && first_choice && @player_first_hand[0] == @player_first_hand[-2]
+  if @bet * 2 <= credit && first_choice == 1 && @player_first_hand[0] == @player_first_hand[-2]
     until @answer == 'Draw' || @answer == 'Double' || @answer == 'Stick' || @answer == 'Split'
       puts "I didn't understand, repeat your choice:"
       @answer = gets.chomp.capitalize
     end
-  elsif @bet * 2 <= credit && first_choice
+  elsif @bet * 2 <= credit && first_choice == 2
     until @answer == 'Draw' || @answer == 'Double' || @answer == 'Stick'
       puts "I didn't understand, repeat your choice:"
       @answer = gets.chomp.capitalize
@@ -102,6 +102,45 @@ def what_to_do(credit, first_choice)
       @answer = gets.chomp.capitalize
   end
   system 'clear'
+end
+
+def double(first_hand)
+  @double *= 2
+  player_new_pick = @cards_hash.to_a.sample
+  @cards_hash.delete(player_new_pick[0])
+  first_hand ? @player_first_hand = "#{@player_first_hand} ~~~ #{player_new_pick[0]}" : @player_second_hand = "#{@player_second_hand} ~~~ #{player_new_pick[0]}"
+  system 'clear'
+  puts "You chose to #{@answer}!"
+  change_as(player_new_pick) if player_new_pick[1] == 'flexible'
+  first_hand ? @player_first_hand_score += player_new_pick[1].to_i : @player_second_hand_score += player_new_pick[1].to_i
+  show_cards(true)
+  sleep(2)
+  system 'clear'
+  if first_hand && @player_first_hand_score > 21
+    puts 'You burned out! Better luck next time'
+    @credit -= (@bet * 2)
+    @bet = 0
+  elsif !first_hand && @player_second_hand_score > 21
+    puts 'You burned out! Better luck next time'
+    @credit -= (@second_bet * 2)
+    @second_bet = 0
+  elsif first_hand
+    @bet *= 2
+  else
+    @second_bet *= 2
+  end
+end
+
+def draw(first_hand)
+  player_new_pick = @cards_hash.to_a.sample
+  @cards_hash.delete(player_new_pick[0])
+  first_hand ? @player_first_hand = "#{@player_first_hand} ~~~ #{player_new_pick[0]}" : @player_second_hand = "#{@player_second_hand} ~~~ #{player_new_pick[0]}"
+  system 'clear'
+  puts "You chose to #{@answer}!"
+  first_hand ? @player_first_hand_score += player_new_pick[1].to_i : @player_second_hand_score += player_new_pick[1].to_i
+  change_as(player_new_pick) if player_new_pick[1] == 'flexible'
+  show_cards(true)
+  sleep(2)
 end
 
 def change_as(player_new_pick)
@@ -119,9 +158,5 @@ def change_as(player_new_pick)
     end
   end
   @player_new_pick = player_new_pick
-end
-
-def double_hand()
-
 end
 end

@@ -17,7 +17,7 @@ require_relative 'methods'
 system 'clear'
 
 # Card library
-cards_hash = { 'A♠' => 11,
+@cards_hash = { 'A♠' => 11,
                '2♠' => 2,
                '3♠' => 3,
                '4♠' => 4,
@@ -94,10 +94,10 @@ while play
   @bet = 0
   @double = 1
   @double_valid = ''
-  cards_hash['A♠'] = 11 if cards_hash['A♠']
-  cards_hash['A♡'] = 11 if cards_hash['A♡']
-  cards_hash['A♣'] = 11 if cards_hash['A♣']
-  cards_hash['A♢'] = 11 if cards_hash['A♢']
+  @cards_hash['A♠'] = 11 if @cards_hash['A♠']
+  @cards_hash['A♡'] = 11 if @cards_hash['A♡']
+  @cards_hash['A♣'] = 11 if @cards_hash['A♣']
+  @cards_hash['A♢'] = 11 if @cards_hash['A♢']
   @credit = credit
   # Set game constants
 
@@ -108,20 +108,21 @@ while play
   # Croupier deals
   puts 'Croupier deals...'
   sleep(1)
-  croupier_1rst_pick = cards_hash.to_a.sample
-  cards_hash.delete(croupier_1rst_pick[0])
-  player_1rst_pick = split_cards_hash.to_a.sample
-  #cards_hash.delete(player_1rst_pick[0])
-  croupier_2nd_pick = cards_hash.to_a.sample
-  cards_hash.delete(croupier_2nd_pick[0])
-  player_2nd_pick = split_cards_hash.to_a.sample
-  #cards_hash.delete(player_2nd_pick[0])
+  croupier_1rst_pick = @cards_hash.to_a.sample
+  @cards_hash.delete(croupier_1rst_pick[0])
+  player_1rst_pick = @cards_hash.to_a.sample
+  @cards_hash.delete(player_1rst_pick[0])
+  croupier_2nd_pick = @cards_hash.to_a.sample
+  @cards_hash.delete(croupier_2nd_pick[0])
+  player_2nd_pick = @cards_hash.to_a.sample
+  @cards_hash.delete(player_2nd_pick[0])
   croupier_picks(croupier_1rst_pick, croupier_2nd_pick)
   @player_first_hand = "#{player_1rst_pick[0]} ~~~ #{player_2nd_pick[0]}"
   @player_first_hand_score += player_1rst_pick[1] + player_2nd_pick[1]
   # Croupier deals
 
   # Show the cards
+  system 'clear'
   show_cards(true)
   # Show the cards
 
@@ -131,94 +132,119 @@ while play
 
   # Ask and choose what to do next
   if @game_is_on
-    what_to_do(credit, true)
+    what_to_do(credit, 1)
   end
   # Ask and choose what to do next
 
   # Changing As values to be flexible
-  if cards_hash['A♠']
-    cards_hash['A♠'] = 'flexible'
+  if @cards_hash['A♠']
+    @cards_hash['A♠'] = 'flexible'
   end
-  if cards_hash['A♡']
-    cards_hash['A♡'] = 'flexible'
+  if @cards_hash['A♡']
+    @cards_hash['A♡'] = 'flexible'
   end
-  if cards_hash['A♣']
-    cards_hash['A♣'] = 'flexible'
+  if @cards_hash['A♣']
+    @cards_hash['A♣'] = 'flexible'
   end
-  if cards_hash['A♢']
-    cards_hash['A♢'] = 'flexible'
+  if @cards_hash['A♢']
+    @cards_hash['A♢'] = 'flexible'
   end
   # Changing As values to be flexible
 
   # If player splits
   if @game_is_on && @answer == 'Split'
-    second_bet = @bet
-    player_3rd_pick = cards_hash.to_a.sample
-    cards_hash.delete(player_3rd_pick[0])
-    player_4th_pick = cards_hash.to_a.sample
-    cards_hash.delete(player_4th_pick[0])
+    @second_bet = @bet
+    player_3rd_pick = @cards_hash.to_a.sample
+    @cards_hash.delete(player_3rd_pick[0])
+    player_4th_pick = @cards_hash.to_a.sample
+    @cards_hash.delete(player_4th_pick[0])
     @player_first_hand = "#{player_1rst_pick[0]} ~~~ #{player_3rd_pick[0]}"
     @player_second_hand = "#{player_2nd_pick[0]} ~~~ #{player_4th_pick[0]}"
-    @player_first_hand_score += player_1rst_pick[1] + player_3rd_pick[1]
-    @player_second_hand_score += player_2nd_pick[1] + player_4th_pick[1]
+    @player_first_hand_score = player_1rst_pick[1].to_i + player_3rd_pick[1].to_i
+    @player_second_hand_score = player_2nd_pick[1].to_i + player_4th_pick[1].to_i
   end
   # If player splits
 
+  # First hand
+  if @player_second_hand_score > 0
+    system 'clear'
+    show_cards(true)
+    puts 'First hand:'
+    what_to_do(credit, 2)
+  end
+
   # If player doubles
   if @game_is_on && @answer == 'Double'
-    @double = 2
-    player_new_pick = cards_hash.to_a.sample
-    cards_hash.delete(player_new_pick[0])
-    @player_first_hand = "#{@player_first_hand} ~~~ #{player_new_pick[0]}"
-    puts "You chose to #{@answer}!"
-    change_as(player_new_pick) if player_new_pick[1] == 'flexible'
-    @player_first_hand_score += player_new_pick[1]
-    show_cards(true)
-    sleep(2)
-    if @player_first_hand_score > 21
-      puts 'You burned out! Better luck next time'
-      credit -= (@bet * @double)
-      @game_is_on = false
-    end
+    double(true)
   end
   # If player doubles
 
   # If player draws
   while @game_is_on && @answer == 'Draw' && @player_first_hand_score < 21
-    player_new_pick = cards_hash.to_a.sample
-    cards_hash.delete(player_new_pick[0])
-    @player_first_hand = "#{@player_first_hand} ~~~ #{player_new_pick[0]}"
-    system 'clear'
-    puts "You chose to #{@answer}!"
-    @player_first_hand_score += player_new_pick[1]
-    change_as(player_new_pick) if player_new_pick[1] == 'flexible'
-    show_cards(true)
-    sleep(2)
+    draw(true)
     if @player_first_hand_score > 21
+      system 'clear'
       puts 'You burned out! Better luck next time'
-      credit -= (@bet * @double)
-      @game_is_on = false
+      @credit -= @bet
+      bet = 0
+      break
     elsif @player_first_hand_score < 21
-      what_to_do(credit, false)
-      puts "You chose to #{@answer}!"
+      what_to_do(credit, 0)
       sleep(2)
     end
   end
   # If player draws
 
-  # Show the game
-  if @game_is_on
-    @croupier_hand = "#{croupier_1rst_pick[0]} ~~~ #{croupier_2nd_pick[0]}"
+  # First hand
+
+  # Second hand
+  if @player_second_hand_score > 0
+    sleep(2)
     system 'clear'
+    show_cards(true)
+    puts 'Second hand:'
+    what_to_do(credit, 2)
+
+    # If player doubles
+    if @game_is_on && @answer == 'Double'
+      double(false)
+    end
+    # If player doubles
+
+    # If player draws
+    while @game_is_on && @answer == 'Draw' && @player_second_hand_score < 21
+      draw(false)
+      if @player_second_hand_score > 21
+        system 'clear'
+        puts 'You burned out! Better luck next time'
+        @credit -= @second_bet
+        bet = 0
+      elsif @player_second_hand_score < 21
+        what_to_do(credit, 0)
+        sleep(2)
+      end
+    end
+    # If player draws
+  end
+  #Second hand
+
+  # Show the game
+  if @player_first_hand_score || @player_second_hand_score <= 21
+    system 'clear'
+    @croupier_hand = "#{croupier_1rst_pick[0]} ~~~ #{croupier_2nd_pick[0]}"
     show_cards(false)
     sleep(2)
+  else 
+    @game_is_on = false
   end
   # Show the game
 
   # Croupier plays
+  puts @game_is_on
   while @game_is_on && @croupier_total_score < 17
-    croupier_new_pick = cards_hash.to_a.sample
-    cards_hash.delete(croupier_new_pick[0])
+    system 'clear'
+    croupier_new_pick = @cards_hash.to_a.sample
+    @cards_hash.delete(croupier_new_pick[0])
     @croupier_total_score += croupier_new_pick[1].to_i
     @croupier_hand = "#{@croupier_hand} ~~~ #{croupier_new_pick[0]}"
     system 'clear'
@@ -229,26 +255,41 @@ while play
 
   # Game results
   if @game_is_on
+    system 'clear'
+    puts 'First hand:'
     if @croupier_total_score == @player_first_hand_score
       puts 'Push!'
     elsif @croupier_total_score > 21
       puts 'Croupier burned out!'
-      credit += (@bet * @double)
-      @game_is_on = false
+      @credit += @bet
     elsif @croupier_total_score > @player_first_hand_score
       puts "Croupier's score is #{@croupier_total_score}! You lost. Better luck next time"
-      credit -= (@bet * @double)
-      @game_is_on = false
-    else
+      @credit -= @bet
+    elsif @croupier_total_score < @player_first_hand_score && @player_first_hand_score <= 21
       puts "Croupier's score is #{@croupier_total_score}! You won!"
-      credit += (@bet * @double)
-      @game_is_on = false
+      @credit += @bet
     end
+
+    if @player_second_hand_score > 0
+      if @croupier_total_score == @player_second_hand_score
+        puts 'Push!'
+      elsif @croupier_total_score > 21
+        puts 'Croupier burned out!'
+        @credit += @second_bet
+      elsif @croupier_total_score > @player_second_hand_score
+        puts "Croupier's score is #{@croupier_total_score}! You lost. Better luck next time"
+        @credit -= @second_bet
+      elsif @croupier_total_score < @player_second_hand_score && @player_second_hand_score <= 21
+        puts "Croupier's score is #{@croupier_total_score}! You won!"
+        @credit += @second_bet
+      end
+    end
+    credit = @credit
   end
   # Game results
 
   # End game
-  sleep(2)
+  sleep(5)
   system 'clear'
   puts "Here are your credits : #{credit}$"
   if credit.positive?
@@ -282,7 +323,6 @@ while play
     puts "You lost! You don't have any credits left"
     play = false
   end
-  sleep(3)
   system 'clear'
   # End Game
 end
